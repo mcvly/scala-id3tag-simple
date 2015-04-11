@@ -21,16 +21,18 @@ object Main {
   }
 
   def processFiles(dirPath: String) = {
-    val mp3Files = getFileTree(new File(dirPath)).filter(_.getName.toLowerCase.endsWith(".mp3"))
-    mp3Files.par.foreach(workWithTag)
+    val mp3Files = getFileTree(new File(dirPath)).filter(_.toLowerCase.endsWith(".mp3"))
+    mp3Files.foreach(workWithTag)
   }
 
-  def getFileTree(f: File): Stream[File] =
-    f #:: (if (f.isDirectory) f.listFiles().toStream.flatMap(getFileTree) else Stream.empty)
+  def getFileTree(f: File): Stream[String] =
+    f.getAbsolutePath #:: (if (f.isDirectory) f.listFiles().toStream.flatMap(getFileTree) else Stream.empty)
 
-  def workWithTag(file: File) = {
+  def workWithTag(filePath: String) = {
+    val parser = new TagParser(filePath)
+    val tag = parser.readTags
     ///    val id3Tag = mp3File.getId3v2Tag
     //    println(s"${id3Tag.getArtist} - ${id3Tag.getTitle}")
-    println(file.toPath)
+    println(tag)
   }
 }
